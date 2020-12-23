@@ -71,7 +71,6 @@ add_definitions(-DFLATBUFFERS_LOCALE_INDEPENDENT=$<BOOL:${FLATBUFFERS_LOCALE_IND
 # version
 if(DEFINED FLATBUFFERS_VER)
   set(_ver _${FLATBUFFERS_VER})
-  set(CMAKE_INSTALL_INCLUDEDIR include/flatbuffers${_ver})
 endif()
 # NAMESPACE
 if(DEFINED XP_NAMESPACE)
@@ -543,6 +542,7 @@ if(FLATBUFFERS_INSTALL)
   configure_file(CMake/FlatbuffersConfigVersion.cmake.in FlatbuffersConfigVersion.cmake @ONLY)
   install(
       FILES "CMake/FlatbuffersConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/FlatbuffersConfigVersion.cmake"
+        "CMake/BuildFlatBuffers.cmake" "CMake/FindFlatBuffers.cmake"
       DESTINATION ${FB_CMAKE_DIR}
   )
 

@@ -25,6 +25,7 @@ else()
   project(FlatBuffers)
 endif (POLICY CMP0048)
 
+include(flags OPTIONAL)
 include(CMake/Version.cmake)
 
 # generate compile_commands.json
@@ -107,6 +108,17 @@ if(NOT DEFINED FLATBUFFERS_LOCALE_INDEPENDENT)
   endif()
 endif()
 add_definitions(-DFLATBUFFERS_LOCALE_INDEPENDENT=$<BOOL:${FLATBUFFERS_LOCALE_INDEPENDENT}>)
+
+# version
+if(DEFINED FLATBUFFERS_VER)
+  set(_ver _${FLATBUFFERS_VER})
+endif()
+# NAMESPACE
+if(DEFINED XP_NAMESPACE)
+  set(nameSpace ${XP_NAMESPACE}::)
+else()
+  set(nameSpace flatbuffers::)
+endif()
 
 set(FlatBuffers_Library_SRCS
   include/flatbuffers/allocator.h
@@ -406,6 +418,7 @@ if(FLATBUFFERS_BUILD_FLATLIB)
   if(FLATBUFFERS_ENABLE_PCH)
     add_pch_to_target(flatbuffers include/flatbuffers/pch/pch.h)
   endif()
+  set_target_properties(flatbuffers PROPERTIES OUTPUT_NAME flatbuffers${_ver})
 endif()
 
 if(FLATBUFFERS_BUILD_FLATC)
@@ -427,6 +440,9 @@ if(FLATBUFFERS_BUILD_FLATC)
   if(FLATBUFFERS_STATIC_FLATC AND NOT MSVC)
     target_link_libraries(flatc PRIVATE -static)
   endif()
+  set_target_properties(flatc PROPERTIES
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
+    OUTPUT_NAME flatc${_ver})
 endif()
 
 if(FLATBUFFERS_BUILD_FLATHASH)
@@ -647,11 +663,12 @@ if(FLATBUFFERS_INSTALL)
 
   install(DIRECTORY include/flatbuffers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-  set(FB_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/flatbuffers")
+  set(FB_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/flatbuffers${_ver}")
 
   configure_file(CMake/FlatbuffersConfigVersion.cmake.in FlatbuffersConfigVersion.cmake @ONLY)
   install(
       FILES "CMake/FlatbuffersConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/FlatbuffersConfigVersion.cmake"
+        "CMake/BuildFlatBuffers.cmake" "CMake/FindFlatBuffers.cmake"
       DESTINATION ${FB_CMAKE_DIR}
   )
 
@@ -664,7 +681,7 @@ if(FLATBUFFERS_INSTALL)
 
     install(EXPORT FlatbuffersTargets
       FILE FlatbuffersTargets.cmake
-      NAMESPACE flatbuffers::
+      NAMESPACE ${nameSpace}
       DESTINATION ${FB_CMAKE_DIR}
     )
   endif()
@@ -678,7 +695,7 @@ if(FLATBUFFERS_INSTALL)
     install(
       EXPORT FlatcTargets
       FILE FlatcTargets.cmake
-      NAMESPACE flatbuffers::
+      NAMESPACE ${nameSpace}
       DESTINATION ${FB_CMAKE_DIR}
     )
   endif()
@@ -695,7 +712,7 @@ if(FLATBUFFERS_INSTALL)
     install(
       EXPORT FlatbuffersSharedTargets
       FILE FlatbuffersSharedTargets.cmake
-      NAMESPACE flatbuffers::
+      NAMESPACE ${nameSpace}
       DESTINATION ${FB_CMAKE_DIR}
     )
   endif()

@@ -690,6 +690,7 @@ if(FLATBUFFERS_INSTALL)
     install(
       TARGETS flatc EXPORT FlatcTargets
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      CONFIGURATIONS Release
     )
 
     install(

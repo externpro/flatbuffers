@@ -109,17 +109,6 @@ if(NOT DEFINED FLATBUFFERS_LOCALE_INDEPENDENT)
 endif()
 add_definitions(-DFLATBUFFERS_LOCALE_INDEPENDENT=$<BOOL:${FLATBUFFERS_LOCALE_INDEPENDENT}>)
 
-# version
-if(DEFINED FLATBUFFERS_VER)
-  set(_ver _${FLATBUFFERS_VER})
-endif()
-# NAMESPACE
-if(DEFINED XP_NAMESPACE)
-  set(nameSpace ${XP_NAMESPACE}::)
-else()
-  set(nameSpace flatbuffers::)
-endif()
-
 set(FlatBuffers_Library_SRCS
   include/flatbuffers/allocator.h
   include/flatbuffers/array.h
@@ -418,7 +407,6 @@ if(FLATBUFFERS_BUILD_FLATLIB)
   if(FLATBUFFERS_ENABLE_PCH)
     add_pch_to_target(flatbuffers include/flatbuffers/pch/pch.h)
   endif()
-  set_target_properties(flatbuffers PROPERTIES OUTPUT_NAME flatbuffers${_ver})
 endif()
 
 if(FLATBUFFERS_BUILD_FLATC)
@@ -440,9 +428,7 @@ if(FLATBUFFERS_BUILD_FLATC)
   if(FLATBUFFERS_STATIC_FLATC AND NOT MSVC)
     target_link_libraries(flatc PRIVATE -static)
   endif()
-  set_target_properties(flatc PROPERTIES
-    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
-    OUTPUT_NAME flatc${_ver})
+  set_target_properties(flatc PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
 endif()
 
 if(FLATBUFFERS_BUILD_FLATHASH)
@@ -663,7 +649,17 @@ if(FLATBUFFERS_INSTALL)
 
   install(DIRECTORY include/flatbuffers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-  set(FB_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/flatbuffers${_ver}")
+  if(DEFINED XP_NAMESPACE)
+    set(nameSpace ${XP_NAMESPACE}::)
+    set(XP_OPT_INSTALL EXCLUDE_FROM_ALL)
+  else()
+    set(nameSpace flatbuffers::)
+  endif()
+  if(DEFINED XP_INSTALL_CMAKEDIR)
+    set(FB_CMAKE_DIR ${XP_INSTALL_CMAKEDIR})
+  else()
+    set(FB_CMAKE_DIR "${CMAKE_INSTALL_DATADIR}/cmake/flatbuffers")
+  endif()
 
   configure_file(CMake/FlatbuffersConfigVersion.cmake.in FlatbuffersConfigVersion.cmake @ONLY)
   install(
@@ -722,6 +718,7 @@ if(FLATBUFFERS_INSTALL)
       configure_file(CMake/flatbuffers.pc.in flatbuffers.pc @ONLY)
       install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/flatbuffers.pc"
+        ${XP_OPT_INSTALL}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
       )
   endif()

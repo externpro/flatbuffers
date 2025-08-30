@@ -7,6 +7,7 @@ on:
 jobs:
   stale:
 
+    if: github.repository == 'google/flatbuffers'
     runs-on: ubuntu-latest
 
     steps:

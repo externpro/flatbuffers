@@ -155,5 +155,10 @@ _deps/
 kotlin/**/generated
 MODULE.bazel.lock
 
+# externpro
+.env
+_bld*/
+docker-compose.override.yml
+
 # Ignore the generated docs
 docs/site

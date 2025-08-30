@@ -1,12 +1,17 @@
 # This is the legacy minimum version flatbuffers supported for a while.
-cmake_minimum_required(VERSION 3.8...3.25.2)
+cmake_minimum_required(VERSION 3.8...3.31)
 
 # Attempt to read the current version of flatbuffers by looking at the latest tag.
 include(CMake/Version.cmake)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES xproinc)
+
 project(FlatBuffers
         VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
         LANGUAGES CXX)
+
+include(xpflags)
 
 # generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -469,6 +474,7 @@ if(FLATBUFFERS_BUILD_FLATC)
   if(FLATBUFFERS_STATIC_FLATC AND NOT MSVC)
     target_link_libraries(flatc PRIVATE -static)
   endif()
+  set_target_properties(flatc PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
 endif()
 
 if(FLATBUFFERS_BUILD_FLATHASH)
@@ -617,13 +623,21 @@ if(FLATBUFFERS_INSTALL)
 
   install(DIRECTORY include/flatbuffers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+  if(DEFINED XP_NAMESPACE)
+    set(nameSpace ${XP_NAMESPACE}::)
+    set(XP_OPT_INSTALL EXCLUDE_FROM_ALL)
+    set(FB_CMAKE_DIR ${CMAKE_INSTALL_DATADIR}/cmake)
+  else()
+    set(nameSpace flatbuffers::)
   set(FB_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/flatbuffers")
+  endif()
 
   configure_file(CMake/flatbuffers-config-version.cmake.in flatbuffers-config-version.cmake @ONLY)
   install(
       FILES
         "CMake/flatbuffers-config.cmake"
         "CMake/BuildFlatBuffers.cmake"
+        "CMake/FindFlatBuffers.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/flatbuffers-config-version.cmake"
       DESTINATION ${FB_CMAKE_DIR}
   )
@@ -637,7 +651,7 @@ if(FLATBUFFERS_INSTALL)
 
     install(EXPORT FlatBuffersTargets
       FILE FlatBuffersTargets.cmake
-      NAMESPACE flatbuffers::
+      NAMESPACE ${nameSpace}
       DESTINATION ${FB_CMAKE_DIR}
     )
   endif()
@@ -646,12 +660,13 @@ if(FLATBUFFERS_INSTALL)
     install(
       TARGETS flatc EXPORT FlatcTargets
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      CONFIGURATIONS Release
     )
 
     install(
       EXPORT FlatcTargets
       FILE FlatcTargets.cmake
-      NAMESPACE flatbuffers::
+      NAMESPACE ${nameSpace}
       DESTINATION ${FB_CMAKE_DIR}
     )
   endif()
@@ -668,7 +683,7 @@ if(FLATBUFFERS_INSTALL)
     install(
       EXPORT FlatBuffersSharedTargets
       FILE FlatBuffersSharedTargets.cmake
-      NAMESPACE flatbuffers::
+      NAMESPACE ${nameSpace}
       DESTINATION ${FB_CMAKE_DIR}
     )
   endif()
@@ -677,6 +692,7 @@ if(FLATBUFFERS_INSTALL)
       configure_file(CMake/flatbuffers.pc.in flatbuffers.pc @ONLY)
       install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/flatbuffers.pc"
+        ${XP_OPT_INSTALL}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
       )
   endif()

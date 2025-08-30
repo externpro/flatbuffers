@@ -15,6 +15,9 @@ if(CMAKE_VERSION VERSION_LESS 3.16)
   return()
 endif()
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES xproinc)
+
 if (POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
   project(FlatBuffers

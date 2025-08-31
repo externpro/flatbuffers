@@ -618,19 +618,32 @@ if(FLATBUFFERS_BUILD_GRPCTEST)
   )
 endif()
 
+function(callPackageDevel)
+  string(TOUPPER ${CMAKE_PROJECT_NAME} PRJ)
+  string(JOIN "\n" EXT3
+    "set(${PRJ}_FLATC_EXECUTABLE ${nameSpace}flatc)"
+    "list(APPEND reqVars ${PRJ}_FLATC_EXECUTABLE)"
+    ""
+    )
+  set(CMAKE_PROJECT_NAME flatbuffers)
+  set(XP_INSTALL_CMAKEDIR ${FB_CMAKE_DIR})
+  xpPackageDevel(TARGETS_FILE flatbuffers-config LIBRARIES ${nameSpace}flatbuffers)
+endfunction()
+
 if(FLATBUFFERS_INSTALL)
   include(GNUInstallDirs)
 
-  install(DIRECTORY include/flatbuffers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
   if(DEFINED XP_NAMESPACE)
     set(nameSpace ${XP_NAMESPACE}::)
-    set(XP_OPT_INSTALL EXCLUDE_FROM_ALL)
     set(FB_CMAKE_DIR ${CMAKE_INSTALL_DATADIR}/cmake)
+    callPackageDevel()
+    set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME devel)
   else()
     set(nameSpace flatbuffers::)
   set(FB_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/flatbuffers")
   endif()
+
+  install(DIRECTORY include/flatbuffers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
   configure_file(CMake/flatbuffers-config-version.cmake.in flatbuffers-config-version.cmake @ONLY)
   install(
@@ -638,6 +651,7 @@ if(FLATBUFFERS_INSTALL)
         "CMake/flatbuffers-config.cmake"
         "CMake/BuildFlatBuffers.cmake"
         "CMake/FindFlatBuffers.cmake"
+        "CMake/xpflatbuffers.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/flatbuffers-config-version.cmake"
       DESTINATION ${FB_CMAKE_DIR}
   )
@@ -660,7 +674,6 @@ if(FLATBUFFERS_INSTALL)
     install(
       TARGETS flatc EXPORT FlatcTargets
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-      CONFIGURATIONS Release
     )
 
     install(
@@ -688,11 +701,10 @@ if(FLATBUFFERS_INSTALL)
     )
   endif()
 
-  if(FLATBUFFERS_BUILD_SHAREDLIB OR FLATBUFFERS_BUILD_FLATLIB)
+  if((FLATBUFFERS_BUILD_SHAREDLIB OR FLATBUFFERS_BUILD_FLATLIB) AND NOT DEFINED XP_NAMESPACE)
       configure_file(CMake/flatbuffers.pc.in flatbuffers.pc @ONLY)
       install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/flatbuffers.pc"
-        ${XP_OPT_INSTALL}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
       )
   endif()

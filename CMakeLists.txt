@@ -4,14 +4,11 @@ cmake_minimum_required(VERSION 3.8...3.31)
 # Attempt to read the current version of flatbuffers by looking at the latest tag.
 include(CMake/Version.cmake)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
-set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES xproinc)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
 
 project(FlatBuffers
         VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
         LANGUAGES CXX)
-
-include(xpflags)
 
 # generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

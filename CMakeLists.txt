@@ -632,7 +632,7 @@ if(FLATBUFFERS_INSTALL)
       LICENSE "[Apache-2.0](https://github.com/google/flatbuffers/blob/v25.2.10/LICENSE 'Apache License, Version 2.0')"
       )
     set(FB_NAMESPACE ${XP_NAMESPACE})
-    set(FB_CMAKE_DIR ${XP_INSTALL_CMAKEDIR})
+    set(FB_CMAKE_DIR ${CMAKE_INSTALL_CMAKEDIR})
     set(FB_OPT_INSTALL FALSE)
   else()
     set(FB_NAMESPACE flatbuffers)

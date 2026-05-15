@@ -618,20 +618,11 @@ if(FLATBUFFERS_INSTALL)
   if(COMMAND xpExternPackage)
     string(TOUPPER ${CMAKE_PROJECT_NAME} PRJ)
     string(JOIN "\n" EXT2
-      "# includes follow repo CMake/flatbuffers-config.cmake"
-      "include(\${CMAKE_CURRENT_LIST_DIR}/FlatcTargets.cmake OPTIONAL)"
-      "include(\${CMAKE_CURRENT_LIST_DIR}/FlatBuffersSharedTargets.cmake OPTIONAL)"
-      "include(\${CMAKE_CURRENT_LIST_DIR}/BuildFlatBuffers.cmake OPTIONAL)"
       "include(\${CMAKE_CURRENT_LIST_DIR}/xpflatbuffers.cmake OPTIONAL)"
       ""
       )
-    string(JOIN "\n" EXT3
-      "set(${PRJ}_FLATC_EXECUTABLE flatbuffers::flatc)"
-      "list(APPEND reqVars ${PRJ}_FLATC_EXECUTABLE)"
-      ""
-      )
     xpExternPackage(REPO_NAME flatbuffers TARGETS_FILE FlatBuffersTargets
-      EXE flatc LIBRARIES flatbuffers
+      EXE flatc LIBRARIES flatbuffers DEFAULT_TARGETS flatbuffers
       BASE v${CMAKE_PROJECT_VERSION} XPDIFF "patch"
       WEB "http://google.github.io/flatbuffers/" UPSTREAM "github.com/google/flatbuffers"
       DESC "efficient cross platform serialization library"
@@ -672,13 +663,13 @@ if(FLATBUFFERS_INSTALL)
 
   if(FLATBUFFERS_BUILD_FLATC)
     install(
-      TARGETS flatc EXPORT FlatcTargets
+      TARGETS flatc EXPORT FlatBuffersTargets
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
 
     install(
-      EXPORT FlatcTargets
-      FILE FlatcTargets.cmake
+      EXPORT FlatBuffersTargets
+      FILE FlatBuffersTargets.cmake
       NAMESPACE flatbuffers::
       DESTINATION ${FB_CMAKE_DIR}
     )
@@ -686,7 +677,7 @@ if(FLATBUFFERS_INSTALL)
 
   if(FLATBUFFERS_BUILD_SHAREDLIB)
     install(
-      TARGETS flatbuffers_shared EXPORT FlatBuffersSharedTargets
+      TARGETS flatbuffers_shared EXPORT FlatBuffersTargets
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
       RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -694,8 +685,8 @@ if(FLATBUFFERS_INSTALL)
     )
 
     install(
-      EXPORT FlatBuffersSharedTargets
-      FILE FlatBuffersSharedTargets.cmake
+      EXPORT FlatBuffersTargets
+      FILE FlatBuffersTargets.cmake
       NAMESPACE flatbuffers::
       DESTINATION ${FB_CMAKE_DIR}
     )

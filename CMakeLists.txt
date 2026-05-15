@@ -623,7 +623,7 @@ if(FLATBUFFERS_INSTALL)
       )
     xpExternPackage(REPO_NAME flatbuffers TARGETS_FILE FlatBuffersTargets
       EXE flatc LIBRARIES flatbuffers DEFAULT_TARGETS flatbuffers
-      BASE v${CMAKE_PROJECT_VERSION} XPDIFF "patch"
+      BASE v${CMAKE_PROJECT_VERSION} XPDIFF "patch" FIND_XPRO_CMAKE
       WEB "http://google.github.io/flatbuffers/" UPSTREAM "github.com/google/flatbuffers"
       DESC "efficient cross platform serialization library"
       LICENSE "[Apache-2.0](https://github.com/google/flatbuffers/blob/v25.2.10/LICENSE 'Apache License, Version 2.0')"

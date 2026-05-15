@@ -1,10 +1,8 @@
 # This is the legacy minimum version flatbuffers supported for a while.
-cmake_minimum_required(VERSION 3.8...3.31)
+cmake_minimum_required(VERSION 3.8...4.3)
 
 # Attempt to read the current version of flatbuffers by looking at the latest tag.
 include(CMake/Version.cmake)
-
-set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
 
 project(FlatBuffers
         VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
@@ -617,25 +615,31 @@ endif()
 
 if(FLATBUFFERS_INSTALL)
   include(GNUInstallDirs)
-  if(DEFINED XP_NAMESPACE)
+  if(COMMAND xpExternPackage)
     string(TOUPPER ${CMAKE_PROJECT_NAME} PRJ)
+    string(JOIN "\n" EXT2
+      "# includes follow repo CMake/flatbuffers-config.cmake"
+      "include(\${CMAKE_CURRENT_LIST_DIR}/FlatcTargets.cmake OPTIONAL)"
+      "include(\${CMAKE_CURRENT_LIST_DIR}/FlatBuffersSharedTargets.cmake OPTIONAL)"
+      "include(\${CMAKE_CURRENT_LIST_DIR}/BuildFlatBuffers.cmake OPTIONAL)"
+      "include(\${CMAKE_CURRENT_LIST_DIR}/xpflatbuffers.cmake OPTIONAL)"
+      ""
+      )
     string(JOIN "\n" EXT3
-      "set(${PRJ}_FLATC_EXECUTABLE ${XP_NAMESPACE}::flatc)"
+      "set(${PRJ}_FLATC_EXECUTABLE flatbuffers::flatc)"
       "list(APPEND reqVars ${PRJ}_FLATC_EXECUTABLE)"
       ""
       )
-    xpExternPackage(REPO_NAME flatbuffers NAMESPACE ${XP_NAMESPACE} ALIAS_NAMESPACE flatbuffers
-      TARGETS_FILE flatbuffers-config EXE flatc LIBRARIES flatbuffers
+    xpExternPackage(REPO_NAME flatbuffers TARGETS_FILE FlatBuffersTargets
+      EXE flatc LIBRARIES flatbuffers
       BASE v${CMAKE_PROJECT_VERSION} XPDIFF "patch"
       WEB "http://google.github.io/flatbuffers/" UPSTREAM "github.com/google/flatbuffers"
       DESC "efficient cross platform serialization library"
       LICENSE "[Apache-2.0](https://github.com/google/flatbuffers/blob/v25.2.10/LICENSE 'Apache License, Version 2.0')"
       )
-    set(FB_NAMESPACE ${XP_NAMESPACE})
     set(FB_CMAKE_DIR ${CMAKE_INSTALL_CMAKEDIR})
     set(FB_OPT_INSTALL FALSE)
   else()
-    set(FB_NAMESPACE flatbuffers)
     set(FB_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/flatbuffers")
     set(FB_OPT_INSTALL TRUE)
   endif()
@@ -645,7 +649,6 @@ if(FLATBUFFERS_INSTALL)
   configure_file(CMake/flatbuffers-config-version.cmake.in flatbuffers-config-version.cmake @ONLY)
   install(
       FILES
-        "CMake/flatbuffers-config.cmake"
         "CMake/BuildFlatBuffers.cmake"
         "CMake/FindFlatBuffers.cmake"
         "CMake/xpflatbuffers.cmake"
@@ -662,7 +665,7 @@ if(FLATBUFFERS_INSTALL)
 
     install(EXPORT FlatBuffersTargets
       FILE FlatBuffersTargets.cmake
-      NAMESPACE ${FB_NAMESPACE}::
+      NAMESPACE flatbuffers::
       DESTINATION ${FB_CMAKE_DIR}
     )
   endif()
@@ -676,7 +679,7 @@ if(FLATBUFFERS_INSTALL)
     install(
       EXPORT FlatcTargets
       FILE FlatcTargets.cmake
-      NAMESPACE ${FB_NAMESPACE}::
+      NAMESPACE flatbuffers::
       DESTINATION ${FB_CMAKE_DIR}
     )
   endif()
@@ -693,7 +696,7 @@ if(FLATBUFFERS_INSTALL)
     install(
       EXPORT FlatBuffersSharedTargets
       FILE FlatBuffersSharedTargets.cmake
-      NAMESPACE ${FB_NAMESPACE}::
+      NAMESPACE flatbuffers::
       DESTINATION ${FB_CMAKE_DIR}
     )
   endif()

@@ -14,7 +14,7 @@ function(xpFlatBuffersBuild)
     set(P_GENERATED_INCLUDES_DIR ${CMAKE_CURRENT_BINARY_DIR}/fbs)
   endif()
   if(NOT COMMAND build_flatbuffers)
-    include(${CMAKE_CURRENT_LIST_DIR}/BuildFlatBuffers.cmake)
+    include(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/BuildFlatBuffers.cmake)
   endif()
   build_flatbuffers("${P_SCHEMAS}" "${P_SCHEMA_INCLUDE_DIRS}" ${P_CUSTOM_TARGET_NAME}
     "${P_ADDITIONAL_DEPS}" "${P_GENERATED_INCLUDES_DIR}"

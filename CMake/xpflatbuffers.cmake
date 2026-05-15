@@ -13,6 +13,9 @@ function(xpFlatBuffersBuild)
   if(NOT P_GENERATED_INCLUDES_DIR)
     set(P_GENERATED_INCLUDES_DIR ${CMAKE_CURRENT_BINARY_DIR}/fbs)
   endif()
+  if(NOT COMMAND build_flatbuffers)
+    include(${CMAKE_CURRENT_LIST_DIR}/BuildFlatBuffers.cmake)
+  endif()
   build_flatbuffers("${P_SCHEMAS}" "${P_SCHEMA_INCLUDE_DIRS}" ${P_CUSTOM_TARGET_NAME}
     "${P_ADDITIONAL_DEPS}" "${P_GENERATED_INCLUDES_DIR}"
     "${P_BINARY_SCHEMAS_DIR}" "${P_COPY_TEXT_SCHEMAS_DIR}"
@@ -32,11 +35,17 @@ function(xpFlatBuffersBuildTS)
   set(oneValueArgs OUTPUT_DIR TARGET)
   set(multiValueArgs SCHEMAS)
   cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  xpGetPkgVar(flatbuffers FLATC_EXECUTABLE) # sets FLATBUFFERS_FLATC_EXECUTABLE
+  if(FLATBUFFERS_FLATC_EXECUTABLE)
+    set(FLATC ${FLATBUFFERS_FLATC_EXECUTABLE})
+  elseif(TARGET flatbuffers::flatc)
+    set(FLATC flatbuffers::flatc)
+  else()
+    set(FLATC flatc)
+  endif()
   set(cmdFile "${CMAKE_CURRENT_BINARY_DIR}/${P_TARGET}_fbs_ts_cmd")
   file(GLOB schemas ${P_SCHEMAS})
   add_custom_command(OUTPUT ${cmdFile}
-    COMMAND $<TARGET_FILE:${FLATBUFFERS_FLATC_EXECUTABLE}> --ts -o ${P_OUTPUT_DIR} ${schemas}
+    COMMAND ${FLATC} --ts -o ${P_OUTPUT_DIR} ${schemas}
     COMMAND ${CMAKE_COMMAND} -E touch ${cmdFile}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${schemas}
